@@ -1,0 +1,6 @@
+framework module Pods_CPNetManger_Demo {
+  umbrella header "Pods-CPNetManger_Demo-umbrella.h"
+
+  export *
+  module * { export * }
+}
