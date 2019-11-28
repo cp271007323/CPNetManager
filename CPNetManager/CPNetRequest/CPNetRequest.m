@@ -19,7 +19,13 @@ typedef enum : NSUInteger {
 
 
 @interface CPNetRequest ()
-@property (nonatomic , strong) NSArray<NSString *> *jsonAdjusts;
+
+/// json上传格式的接口
+@property (nonatomic , strong) NSMutableArray<NSString *> *jsonAdjustsUrl;
+
+/// 请求头内容
+@property (nonatomic , strong) NSDictionary *headHTTPHeaderField;
+
 @end
 
 @implementation CPNetRequest
@@ -28,6 +34,7 @@ typedef enum : NSUInteger {
 static CPNetRequest * cpManager;
 static AFURLSessionManager *cpURLSessionManager;
 
+#pragma mark - Life
 +(CPNetRequest *)getManager
 {
     @synchronized (self)
@@ -43,6 +50,17 @@ static AFURLSessionManager *cpURLSessionManager;
     return cpManager;
 }
 
+#pragma mark - Publick
+- (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic
+{
+    self.headHTTPHeaderField = dic;
+}
+
+/// 添加json请求的链接，内部会自行判断
+- (void)addRequestJsonUrl:(NSString *_Nonnull)url
+{
+    [self.jsonAdjustsUrl addObject:url];
+}
 
 /******************************************************************
  普通网络请求
@@ -119,10 +137,7 @@ static AFURLSessionManager *cpURLSessionManager;
                           success:(CPNetRequestSuccess)success
                           failure:(CPNetRequestFailure)failure
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    });
-    [self addRequestSerializerHead:urlStr];
+    [self adjustRequestSerializerHead:urlStr];
     NSURLSessionDataTask *task;
     __weak CPNetRequest *weakSelf = self;
     if (type == CPNetHttp_GET)
@@ -195,7 +210,6 @@ static AFURLSessionManager *cpURLSessionManager;
 /******************************************************************
  文件上传
  ******************************************************************/
-
 - (NSURLSessionDataTask *)CPPOST:(NSString *)urlStr
                       parameters:(NSDictionary *)dictionary
                       dataModels:(NSArray<CPDataModel *> *)dataModels
@@ -222,10 +236,7 @@ static AFURLSessionManager *cpURLSessionManager;
                           failure:(CPNetRequestFailure)failure
 {
     __weak CPNetRequest *weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    });
-    [self addRequestSerializerHead:urlStr];
+    [self adjustRequestSerializerHead:urlStr];
     NSURLSessionDataTask *task = nil;
     task = [manager POST:urlStr parameters:dictionary constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData)
             {
@@ -248,12 +259,10 @@ static AFURLSessionManager *cpURLSessionManager;
             } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject)
             {
                 __strong CPNetRequest *strongSelf = weakSelf;
-                [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                 [strongSelf responseObject:responseObject task:task success:success failure:failure];
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error)
             {
                 __strong CPNetRequest *strongSelf = weakSelf;
-                [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                 [strongSelf failObject:error task:task failure:failure];
             }];
     return task;
@@ -268,7 +277,6 @@ static AFURLSessionManager *cpURLSessionManager;
                                 destination:(CPNetRequestDestination)destination
                           completionHandler:(CPNetRequestDownCompletionHandler)completionHandler
 {
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlStr]];
     NSURLSessionDownloadTask *downloadTask = [cpURLSessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -278,7 +286,6 @@ static AFURLSessionManager *cpURLSessionManager;
             }
         });
     } destination:destination completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error){
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         if (completionHandler)
         {
             completionHandler(response,filePath,error);
@@ -291,9 +298,8 @@ static AFURLSessionManager *cpURLSessionManager;
 
 #pragma mark - Method
 //添加请求头
-- (void)addRequestSerializerHead:(NSString *)urlStr
+- (void)adjustRequestSerializerHead:(NSString *)urlStr
 {
-    
     //表单
     if (![self isJson:urlStr])
     {
@@ -303,6 +309,10 @@ static AFURLSessionManager *cpURLSessionManager;
     else {
         cpManager.requestSerializer = [AFJSONRequestSerializer serializer];
     }
+    
+    [self.headHTTPHeaderField enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        [cpManager.requestSerializer setValue:obj forHTTPHeaderField:key];
+    }];
     
     [cpManager.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     cpManager.requestSerializer.timeoutInterval = 30.f;
@@ -315,7 +325,6 @@ static AFURLSessionManager *cpURLSessionManager;
                task:(NSURLSessionDataTask * _Nonnull)task
             failure:(CPNetRequestFailure)failure
 {
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     NSLog(@"网络异常  -----  code:%ld",error.code);
     if (failure) failure(@"网络异常",[NSString stringWithFormat:@"%ld",(long)error.code],task);
 }
@@ -327,8 +336,6 @@ static AFURLSessionManager *cpURLSessionManager;
                success:(CPNetRequestSuccess)success
                failure:(CPNetRequestFailure)failure
 {
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-//    NSLog(@"%@",responseObject)
     if ([[NSString stringWithFormat:@"%@",responseObject[@"code"]] isEqualToString:@"1"] &&
         responseObject != nil)
     {
@@ -338,12 +345,7 @@ static AFURLSessionManager *cpURLSessionManager;
         }
     }
     else
-    {
-        if ([[NSString stringWithFormat:@"%@",responseObject[@"code"]] isEqualToString:@"-2"])
-        {
-//            [[CPAppSingle shareManager].acountServer.tokenErrorCommand execute:nil];
-        }
-        
+    {   
         if (failure)
         {
             NSString *message = responseObject[@"message"];
@@ -354,7 +356,7 @@ static AFURLSessionManager *cpURLSessionManager;
 
 //判断请求类是否需要转json格式
 - (BOOL)isJson:(NSString *)urlStr{
-    for (NSString *str in self.jsonAdjusts)
+    for (NSString *str in self.jsonAdjustsUrl)
     {
         if ([urlStr containsString:str])
         {
@@ -365,12 +367,12 @@ static AFURLSessionManager *cpURLSessionManager;
 }
 
 #pragma mark - get
-- (NSArray<NSString *> *)jsonAdjusts{
-    if (_jsonAdjusts == nil)
+- (NSMutableArray<NSString *> *)jsonAdjustsUrl{
+    if (_jsonAdjustsUrl == nil)
     {
-        _jsonAdjusts = @[];
+        _jsonAdjustsUrl = [NSMutableArray array];
     }
-    return _jsonAdjusts;
+    return _jsonAdjustsUrl;
 }
 
 @end

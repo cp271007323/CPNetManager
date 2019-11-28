@@ -9,7 +9,6 @@
 #import "CPDataModel.h"
 #import <AVFoundation/AVFoundation.h>
 
-//static NSString *upload_Image = @"image/png";
 static NSString *upload_Image = @"multipart/form-data";
 
 #define CPDataModelTimeIntervalSince1970 [NSString stringWithFormat:@"%lld",(long long)([[NSDate date] timeIntervalSince1970] * 1000)]

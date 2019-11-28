@@ -18,6 +18,10 @@
  网络检测
  */
 +(void)networkReachabilityStart;
+
+
+/// 添加请求头 添加一次就好
++ (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic;
  
 /******************************************************************
  普通网络请求

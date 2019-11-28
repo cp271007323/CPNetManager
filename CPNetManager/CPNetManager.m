@@ -33,6 +33,11 @@
     [manager startMonitoring];
 }
 
++ (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic
+{
+    [[CPNetRequest getManager] addHeadHTTPHeaderField:dic];
+}
+
 +(NSURLSessionTask * _Nonnull)POST:(NSString * _Nonnull)urlStr
  parameters:(NSDictionary * _Null_unspecified)dictionary
     success:(CPNetRequestSuccess _Nonnull)success
