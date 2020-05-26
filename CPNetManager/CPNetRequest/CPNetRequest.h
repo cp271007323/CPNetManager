@@ -8,8 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <AFNetworking/AFNetworking.h>
+#import <ReactiveObjC/ReactiveObjC.h>
 #import "CPDataModel.h"
-
 
 typedef enum : NSUInteger {
     //蜂窝、无线
@@ -19,11 +19,11 @@ typedef enum : NSUInteger {
 } CPNetType;//网络类型
 
 typedef void(^CPNetRequestSuccess)(NSDictionary *  _Nullable responseObject , NSURLSessionDataTask * _Nonnull task);
-typedef void(^CPNetRequestFailure)(NSString * _Nullable message , NSString * _Nullable code , NSURLSessionDataTask * _Nonnull task);
+typedef void(^CPNetRequestFailure)(NSDictionary *  _Nullable responseObject , NSString * _Nullable message , NSString * _Nullable code , NSURLSessionDataTask * _Nonnull task);
 typedef NSURL * _Nonnull(^CPNetRequestDestination)(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response);
 typedef void(^CPNetRequestDownProgress)(CGFloat uploadProgress);
 typedef void(^CPNetRequestDownCompletionHandler)(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error);
-
+typedef void(^CPNetRequestTokenOverdueBlock)(BOOL *flag);
 
 @interface CPNetRequest : AFHTTPSessionManager
 
@@ -36,8 +36,28 @@ typedef void(^CPNetRequestDownCompletionHandler)(NSURLResponse * _Nonnull respon
 /// 添加请求头 添加一次就好
 - (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic;
 
-/// 添加json请求的链接，内部会自行判断  添加一次就好
+/// 添加json请求的链接的关键字，内部会自行判断  添加一次就好
 - (void)addRequestJsonUrl:(NSString *_Nonnull)url;
+
+/// 传入token过期标识
+/// @param tokenCode token过期对应的code
+/// @param tokenOverdueBlock 发现token过期时的回调
+- (void)addTokenCode:(NSString *_Nonnull)tokenCode tokenOverdue:(CPNetRequestTokenOverdueBlock _Nullable )tokenOverdueBlock;
+
+/// 请求任务添加
+- (void)addCommandTask:(RACCommand *_Nonnull)command;
+
+/// 请求任务移除
+- (void)removeCommandTask:(RACCommand *_Nonnull)command;
+
+/// 全部任务开始请求
+- (void)startAllDataTaskRequest;
+
+/// 暂停全部任务
+- (void)stopAllDataTaskRequest;
+
+/// 取消全部任务
+- (void)cancelAllDataTaskRequest;
 
 
 /******************************************************************

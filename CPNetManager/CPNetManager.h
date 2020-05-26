@@ -9,10 +9,7 @@
 #import <AFNetworking/AFNetworking.h>
 #import "CPNetRequest.h"
 
-
-
 @interface CPNetManager : NSObject
-
 
 /**
  网络检测

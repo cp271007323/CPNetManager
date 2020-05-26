@@ -7,6 +7,7 @@
 //
 
 #import "CPNetRequest.h"
+#import "RACCommand+CPNetExtension.h"
 
 //请求类型
 typedef enum : NSUInteger {
@@ -25,6 +26,15 @@ typedef enum : NSUInteger {
 
 /// 请求头内容
 @property (nonatomic , strong) NSDictionary *headHTTPHeaderField;
+
+/// token过期的code字段
+@property (nonatomic , copy) NSString *tokenCode;
+
+/// token过期回调
+@property (nonatomic , copy) CPNetRequestTokenOverdueBlock tokenOverdueBlock;
+
+/// 请求任务数组
+@property (nonatomic , strong) NSMutableArray<RACCommand *> *commandArr;
 
 @end
 
@@ -54,12 +64,40 @@ static AFURLSessionManager *cpURLSessionManager;
 - (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic
 {
     self.headHTTPHeaderField = dic;
+    [self.headHTTPHeaderField enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        [cpManager.requestSerializer setValue:obj forHTTPHeaderField:key];
+    }];
 }
 
-/// 添加json请求的链接，内部会自行判断
 - (void)addRequestJsonUrl:(NSString *_Nonnull)url
 {
     [self.jsonAdjustsUrl addObject:url];
+}
+
+- (void)addTokenCode:(NSString *_Nonnull)tokenCode tokenOverdue:(CPNetRequestTokenOverdueBlock)tokenOverdueBlock;
+{
+    self.tokenCode = tokenCode;
+    self.tokenOverdueBlock = tokenOverdueBlock;
+}
+
+- (void)addCommandTask:(RACCommand *_Nonnull)command;
+{
+    //判断是否已经存在，不存在就添加
+    if (![self.commandArr containsObject:command]) {
+        if (command) {
+            [self.commandArr addObject:command];
+        }
+    }
+    NSLog(@"addCommandTask:%@\n%@",self.commandArr,[[self.commandArr valueForKey:@"task"] valueForKey:@"originalRequest"]);
+}
+
+- (void)removeCommandTask:(RACCommand *)command
+{
+    //判断是否已经存在，存在就移除
+    if ([self.commandArr containsObject:command]) {
+       [self.commandArr removeObject:command];
+    }
+    NSLog(@"removeCommandTask:%@\n%@",self.commandArr,[[self.commandArr valueForKey:@"task"] valueForKey:@"originalRequest"]);
 }
 
 /******************************************************************
@@ -140,67 +178,90 @@ static AFURLSessionManager *cpURLSessionManager;
     [self adjustRequestSerializerHead:urlStr];
     NSURLSessionDataTask *task;
     __weak CPNetRequest *weakSelf = self;
+    
     if (type == CPNetHttp_GET)
     {
-        task = [cpManager GET:urlStr parameters:dictionary progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
+        task = [cpManager GET:urlStr parameters:dictionary headers:self.headHTTPHeaderField progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
             __strong CPNetRequest *strongSelf = weakSelf;
-            if ([responseObject[@"code"] integerValue] == -1)
-            {
-                NSLog(@"%@出错",urlStr);
-            }
-            else if ([responseObject[@"code"] integerValue] == -2)
-            {
-                NSLog(@"token出错：%@",urlStr);
-                NSLog(@"responseObject:%@",responseObject);
-            }
             [strongSelf responseObject:responseObject task:task success:success failure:failure];
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error){
             __strong CPNetRequest *strongSelf = weakSelf;
-            [strongSelf failObject:error  task:task failure:failure];
+            if (error.code == -1001)
+            {
+                [strongSelf request:urlStr parameters:dictionary httpType:type success:success failure:failure];
+            }
+            else
+            {
+                [strongSelf failObject:error task:task failure:failure];
+            }
         }];
     }
     else if (type == CPNetHttp_POST)
     {
-        task = [cpManager POST:urlStr parameters:dictionary progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
+        task = [cpManager POST:urlStr parameters:dictionary headers:self.headHTTPHeaderField progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
             __strong CPNetRequest *strongSelf = weakSelf;
-            if ([responseObject[@"code"] integerValue] == -1)
-            {
-                NSLog(@"%@出错",urlStr);
-            }
             [strongSelf responseObject:responseObject task:task success:success failure:failure];
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error){
             __strong CPNetRequest *strongSelf = weakSelf;
-            [strongSelf failObject:error task:task failure:failure];
+            if (error.code == -1001)
+            {
+                [strongSelf request:urlStr parameters:dictionary httpType:type success:success failure:failure];
+            }
+            else
+            {
+                [strongSelf failObject:error task:task failure:failure];
+            }
         }];
     }
     else if (type == CPNetHttp_DEL)
     {
-        task = [cpManager DELETE:urlStr parameters:dictionary success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
+        task = [cpManager DELETE:urlStr parameters:dictionary headers:self.headHTTPHeaderField success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
             __strong CPNetRequest *strongSelf = weakSelf;
             [strongSelf responseObject:responseObject task:task success:success failure:failure];
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error){
             __strong CPNetRequest *strongSelf = weakSelf;
-            [strongSelf failObject:error task:task failure:failure];
+            if (error.code == -1001)
+            {
+                [strongSelf request:urlStr parameters:dictionary httpType:type success:success failure:failure];
+            }
+            else
+            {
+                [strongSelf failObject:error task:task failure:failure];
+            }
         }];
     }
     else if (type == CPNetHttp_PUT)
     {
-        task = [cpManager PUT:urlStr parameters:dictionary success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
+        task = [cpManager PUT:urlStr parameters:dictionary headers:self.headHTTPHeaderField success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
             __strong CPNetRequest *strongSelf = weakSelf;
             [strongSelf responseObject:responseObject task:task success:success failure:failure];
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error){
             __strong CPNetRequest *strongSelf = weakSelf;
-            [strongSelf failObject:error task:task failure:failure];
+            if (error.code == -1001)
+            {
+                [strongSelf request:urlStr parameters:dictionary httpType:type success:success failure:failure];
+            }
+            else
+            {
+                [strongSelf failObject:error task:task failure:failure];
+            }
         }];
     }
     else if (type == CPNetHttp_PATCH)
     {
-        task = [cpManager PATCH:urlStr parameters:dictionary success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
+        task = [cpManager PATCH:urlStr parameters:dictionary headers:self.headHTTPHeaderField success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject){
             __strong CPNetRequest *strongSelf = weakSelf;
             [strongSelf responseObject:responseObject task:task success:success failure:failure];
         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error){
             __strong CPNetRequest *strongSelf = weakSelf;
-            [strongSelf failObject:error task:task failure:failure];
+            if (error.code == -1001)
+            {
+                [strongSelf request:urlStr parameters:dictionary httpType:type success:success failure:failure];
+            }
+            else
+            {
+                [strongSelf failObject:error task:task failure:failure];
+            }
         }];
     }
     return task;
@@ -238,7 +299,7 @@ static AFURLSessionManager *cpURLSessionManager;
     __weak CPNetRequest *weakSelf = self;
     [self adjustRequestSerializerHead:urlStr];
     NSURLSessionDataTask *task = nil;
-    task = [manager POST:urlStr parameters:dictionary constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData)
+    task = [manager POST:urlStr parameters:dictionary headers:self.headHTTPHeaderField constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData)
             {
                 for (CPDataModel *dataModel in dataModels)
                 {
@@ -315,7 +376,7 @@ static AFURLSessionManager *cpURLSessionManager;
     }];
     
     [cpManager.requestSerializer willChangeValueForKey:@"timeoutInterval"];
-    cpManager.requestSerializer.timeoutInterval = 30.f;
+    cpManager.requestSerializer.timeoutInterval = 10.f;
     [cpManager.requestSerializer didChangeValueForKey:@"timeoutInterval"];
     
 }
@@ -326,7 +387,7 @@ static AFURLSessionManager *cpURLSessionManager;
             failure:(CPNetRequestFailure)failure
 {
     NSLog(@"网络异常  -----  code:%ld",error.code);
-    if (failure) failure(@"网络异常",[NSString stringWithFormat:@"%ld",(long)error.code],task);
+    if (failure) failure(nil,@"网络异常",[NSString stringWithFormat:@"%ld",(long)error.code],task);
 }
 
 
@@ -341,15 +402,36 @@ static AFURLSessionManager *cpURLSessionManager;
     {
         if (success)
         {
+            //移除成功的请求
             success(responseObject,task);
         }
     }
     else
-    {   
+    {
+        //比较tokenCode
+        if ([[NSString stringWithFormat:@"%@",responseObject[@"code"]] isEqualToString:[NSString stringWithFormat:@"%@",self.tokenCode]])
+        {
+            static BOOL flag = NO;
+            
+            //取消所有任务
+            [self stopAllDataTaskRequest];
+            
+            //防止多次进入换取新token
+            if (flag == NO)
+            {
+                flag = YES;
+                //token回调过期处理,获取新token
+                if (self.tokenOverdueBlock)
+                {
+                    self.tokenOverdueBlock(&flag);
+                }
+            }
+        }
+        
         if (failure)
         {
             NSString *message = responseObject[@"message"];
-            failure(message,responseObject[@"code"],task);
+            failure(responseObject,message,responseObject[@"code"],task);
         }
     }
 }
@@ -366,6 +448,33 @@ static AFURLSessionManager *cpURLSessionManager;
     return NO;
 }
 
+
+//开始/恢复下载
+- (void)startAllDataTaskRequest
+{
+    for (RACCommand *command in self.commandArr)
+    {
+        [command execute:command.netExtension];
+    }
+}
+
+//暂停任务
+- (void)stopAllDataTaskRequest
+{
+    [self.commandArr enumerateObjectsUsingBlock:^(RACCommand * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj.task suspend];
+    }];
+}
+
+//取消任务
+- (void)cancelAllDataTaskRequest
+{
+    [self.commandArr enumerateObjectsUsingBlock:^(RACCommand * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj.task cancel];
+    }];
+    [self.commandArr removeAllObjects];
+}
+
 #pragma mark - get
 - (NSMutableArray<NSString *> *)jsonAdjustsUrl{
     if (_jsonAdjustsUrl == nil)
@@ -375,5 +484,12 @@ static AFURLSessionManager *cpURLSessionManager;
     return _jsonAdjustsUrl;
 }
 
-@end
+- (NSMutableArray<RACCommand *> *)commandArr
+{
+    if (_commandArr == nil) {
+        _commandArr = [NSMutableArray array];
+    }
+    return _commandArr;
+}
 
+@end

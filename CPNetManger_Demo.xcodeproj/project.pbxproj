@@ -18,6 +18,7 @@
 		E7067137236FF08E0063B02C /* CPNetManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E7067131236FF08E0063B02C /* CPNetManager.m */; };
 		E7067138236FF08E0063B02C /* CPDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = E7067133236FF08E0063B02C /* CPDataModel.m */; };
 		E7067139236FF08E0063B02C /* CPNetRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7067134236FF08E0063B02C /* CPNetRequest.m */; };
+		E726CCFB247CC44000A844FC /* RACCommand+CPNetExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = E726CCFA247CC44000A844FC /* RACCommand+CPNetExtension.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,8 @@
 		E7067134236FF08E0063B02C /* CPNetRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CPNetRequest.m; sourceTree = "<group>"; };
 		E7067135236FF08E0063B02C /* CPDataModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPDataModel.h; sourceTree = "<group>"; };
 		E7067136236FF08E0063B02C /* CPNetRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPNetRequest.h; sourceTree = "<group>"; };
+		E726CCF9247CC44000A844FC /* RACCommand+CPNetExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RACCommand+CPNetExtension.h"; sourceTree = "<group>"; };
+		E726CCFA247CC44000A844FC /* RACCommand+CPNetExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "RACCommand+CPNetExtension.m"; sourceTree = "<group>"; };
 		F1AF657B6FE5B001C3C1CE5E /* Pods-CPNetManger_Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CPNetManger_Demo.release.xcconfig"; path = "Target Support Files/Pods-CPNetManger_Demo/Pods-CPNetManger_Demo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,6 +118,7 @@
 			children = (
 				E7067130236FF08E0063B02C /* CPNetManager.h */,
 				E7067131236FF08E0063B02C /* CPNetManager.m */,
+				E726CCF8247CC42800A844FC /* Category */,
 				E7067132236FF08E0063B02C /* CPNetRequest */,
 			);
 			path = CPNetManager;
@@ -131,6 +135,15 @@
 			path = CPNetRequest;
 			sourceTree = "<group>";
 		};
+		E726CCF8247CC42800A844FC /* Category */ = {
+			isa = PBXGroup;
+			children = (
+				E726CCF9247CC44000A844FC /* RACCommand+CPNetExtension.h */,
+				E726CCFA247CC44000A844FC /* RACCommand+CPNetExtension.m */,
+			);
+			path = Category;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -142,7 +155,7 @@
 				E7067104236FEC9F0063B02C /* Sources */,
 				E7067105236FEC9F0063B02C /* Frameworks */,
 				E7067106236FEC9F0063B02C /* Resources */,
-				6469E5DA8D6DE73117C49E90 /* [CP] Embed Pods Frameworks */,
+				2877EA19A5E3FE4289080B11 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -199,7 +212,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		6469E5DA8D6DE73117C49E90 /* [CP] Embed Pods Frameworks */ = {
+		2877EA19A5E3FE4289080B11 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -250,6 +263,7 @@
 				E7067138236FF08E0063B02C /* CPDataModel.m in Sources */,
 				E7067139236FF08E0063B02C /* CPNetRequest.m in Sources */,
 				E706711E236FECA00063B02C /* main.m in Sources */,
+				E726CCFB247CC44000A844FC /* RACCommand+CPNetExtension.m in Sources */,
 				E7067110236FECA00063B02C /* SceneDelegate.m in Sources */,
 				E7067137236FF08E0063B02C /* CPNetManager.m in Sources */,
 			);
