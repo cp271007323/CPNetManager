@@ -36,6 +36,8 @@ typedef enum : NSUInteger {
 /// 请求任务数组
 @property (nonatomic , strong) NSMutableArray<RACCommand *> *commandArr;
 
+@property (nonatomic , assign) NSInteger responseObjectCode;
+
 @end
 
 @implementation CPNetRequest
@@ -55,6 +57,8 @@ static AFURLSessionManager *cpURLSessionManager;
             cpManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html",@"text/json",@"text/javascript",@"charset=utf-8",@"image/jpeg",@"image/png",@"application/octet-stream",@"text/plain", nil];
             NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
             cpURLSessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
+            
+            cpManager.responseObjectCode = 1;
         }
     }
     return cpManager;
@@ -67,6 +71,11 @@ static AFURLSessionManager *cpURLSessionManager;
     [self.headHTTPHeaderField enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         [cpManager.requestSerializer setValue:obj forHTTPHeaderField:key];
     }];
+}
+
+- (void)addResponseObjectCode:(NSInteger)code
+{
+    self.responseObjectCode = code;
 }
 
 - (void)addRequestJsonUrl:(NSString *_Nonnull)url
@@ -308,6 +317,15 @@ static AFURLSessionManager *cpURLSessionManager;
                     {
                         [formData appendPartWithFileData:dataModel.image_data name:dataModel.image_name fileName:dataModel.image_fileName mimeType:dataModel.image_mimeType];
                     }
+                    //视频上传
+                    else if (dataModel.type == CPDataModelUpload_Video){
+                        [formData appendPartWithFileData:dataModel.video_data name:dataModel.video_Name fileName:dataModel.video_fileName mimeType:dataModel.video_mimeType];
+                        [formData appendPartWithFileData:dataModel.video_thumb_data name:dataModel.video_thumb_name fileName:dataModel.video_thumb_fileName mimeType:dataModel.video_thumb_mimeType];
+                    }
+                    //语音上传
+                    else if (dataModel.type == CPDataModelUpload_Audio){
+                        [formData appendPartWithFileData:dataModel.audio_data name:dataModel.audio_name fileName:dataModel.audio_fileName mimeType:dataModel.audio_mimeType];
+                    }
                 }
             } progress:^(NSProgress * _Nonnull uploadProgress)
             {
@@ -397,7 +415,7 @@ static AFURLSessionManager *cpURLSessionManager;
                success:(CPNetRequestSuccess)success
                failure:(CPNetRequestFailure)failure
 {
-    if ([[NSString stringWithFormat:@"%@",responseObject[@"code"]] isEqualToString:@"1"] &&
+    if ([[NSString stringWithFormat:@"%@",responseObject[@"code"]] isEqualToString:[NSString stringWithString:@"%ld",self.responseObjectCode]] &&
         responseObject != nil)
     {
         if (success)
