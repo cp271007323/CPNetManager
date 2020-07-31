@@ -36,6 +36,9 @@ typedef void(^CPNetRequestTokenOverdueBlock)(BOOL *flag);
 /// 添加请求头 添加一次就好
 - (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic;
 
+/// 添加请求成功时，code的值（默认为1）
+- (void)addResponseObjectCode:(NSInteger)code;
+
 /// 添加json请求的链接的关键字，内部会自行判断  添加一次就好
 - (void)addRequestJsonUrl:(NSString *_Nonnull)url;
 
