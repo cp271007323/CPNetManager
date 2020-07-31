@@ -11,7 +11,7 @@
 
 //文件上传类型
 typedef enum : NSUInteger {
-    CPDataModelUpload_Image
+    CPDataModelUpload_Image,
     CPDataModelUpload_Video,
     CPDataModelUpload_Audio,
 } CPDataModelUpload_Type;

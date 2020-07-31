@@ -415,7 +415,7 @@ static AFURLSessionManager *cpURLSessionManager;
                success:(CPNetRequestSuccess)success
                failure:(CPNetRequestFailure)failure
 {
-    if ([[NSString stringWithFormat:@"%@",responseObject[@"code"]] isEqualToString:[NSString stringWithString:@"%ld",self.responseObjectCode]] &&
+    if ([[NSString stringWithFormat:@"%@",responseObject[@"code"]] isEqualToString:[NSString stringWithFormat:@"%ld",self.responseObjectCode]] &&
         responseObject != nil)
     {
         if (success)
