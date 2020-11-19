@@ -15,20 +15,24 @@ PODS:
   - AFNetworking/UIKit (4.0.1):
     - AFNetworking/NSURLSession
   - ReactiveObjC (3.1.1)
+  - SDAutoLayout (2.2.1)
 
 DEPENDENCIES:
   - AFNetworking
   - ReactiveObjC
+  - SDAutoLayout
 
 SPEC REPOS:
   trunk:
     - AFNetworking
     - ReactiveObjC
+    - SDAutoLayout
 
 SPEC CHECKSUMS:
   AFNetworking: 7864c38297c79aaca1500c33288e429c3451fdce
   ReactiveObjC: 011caa393aa0383245f2dcf9bf02e86b80b36040
+  SDAutoLayout: 8bf6b3bbc8b01f775d4defbb4fda2ace805461be
 
-PODFILE CHECKSUM: 82dd36fac619f92dad27f2438fe778c4721b7c43
+PODFILE CHECKSUM: dffd92e97f4436bf2338afa47ad201015f2f30d1
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.10.0

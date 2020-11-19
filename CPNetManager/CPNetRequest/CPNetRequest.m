@@ -8,6 +8,7 @@
 
 #import "CPNetRequest.h"
 #import "RACCommand+CPNetExtension.h"
+#import "NSURLSessionDownloadTask+CPNetRequestUrl.h"
 
 //请求类型
 typedef enum : NSUInteger {
@@ -35,9 +36,13 @@ typedef enum : NSUInteger {
 
 /// 请求任务数组
 @property (nonatomic , strong) NSMutableArray<RACCommand *> *commandArr;
+/// 下载任务数组
+@property (nonatomic , strong) NSMutableArray<NSURLSessionDownloadTask *> *downTaskArr;
 
 @property (nonatomic , assign) NSInteger responseObjectCode;
 
+/// 下载文件记录
+@property (nonatomic , strong) NSMutableDictionary<NSString * , NSData *> *downFileDataSource;
 @end
 
 @implementation CPNetRequest
@@ -54,10 +59,11 @@ static AFURLSessionManager *cpURLSessionManager;
         if (!cpManager)
         {
             cpManager = [[CPNetRequest alloc] init];
-            cpManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html",@"text/json",@"text/javascript",@"charset=utf-8",@"image/jpeg",@"image/png",@"application/octet-stream",@"text/plain", nil];
-            NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-            cpURLSessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
             
+            cpManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html",@"text/json",@"text/javascript",@"charset=utf-8",@"image/jpeg",@"image/png",@"application/octet-stream",@"text/plain", nil];
+            NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"CPNetDownFile"];
+
+            cpURLSessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
             cpManager.responseObjectCode = 1;
         }
     }
@@ -356,24 +362,94 @@ static AFURLSessionManager *cpURLSessionManager;
                                 destination:(CPNetRequestDestination)destination
                           completionHandler:(CPNetRequestDownCompletionHandler)completionHandler
 {
+    [self adjustRequestSerializerHead:urlStr];
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:urlStr]];
-    NSURLSessionDownloadTask *downloadTask = [cpURLSessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (progress)
-            {
-                progress(1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
+    
+    __weak CPNetRequest *weakSelf = self;
+    if ([self.downFileDataSource.allKeys containsObject:urlStr.lastPathComponent]) {
+        NSURLSessionDownloadTask *downloadTask = [cpURLSessionManager downloadTaskWithResumeData:self.downFileDataSource[urlStr.lastPathComponent] progress:^(NSProgress * _Nonnull downloadProgress) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (progress)
+                {
+                    progress(1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
+                }
+            });
+        } destination:destination completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error){
+            
+            if (!error) {
+                __strong CPNetRequest *strongSelf = weakSelf;
+                NSPredicate *pre = [NSPredicate predicateWithFormat:@"self.CPNetRequestUrl contains %@",urlStr.lastPathComponent];
+                [strongSelf.downTaskArr removeObjectsInArray:[strongSelf.downTaskArr filteredArrayUsingPredicate:pre]];
+                [strongSelf.downFileDataSource removeObjectForKey:filePath.absoluteString.lastPathComponent];
+                [strongSelf updataDownFileDataSourceToLocation];
             }
-        });
-    } destination:destination completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error){
-        if (completionHandler)
-        {
-            completionHandler(response,filePath,error);
-        }
-        
-    }];
-    return downloadTask;
+            
+            if (completionHandler)
+            {
+                completionHandler(response,filePath,error);
+            }
+        }];
+        downloadTask.CPNetRequestUrl = urlStr;
+        [self.downTaskArr addObject:downloadTask];
+        return downloadTask;
+    }
+    else {
+        NSURLSessionDownloadTask *downloadTask = [cpURLSessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (progress)
+                {
+                    progress(1.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
+                }
+            });
+        } destination:destination completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error){
+            
+            if (!error) {
+                __strong CPNetRequest *strongSelf = weakSelf;
+                NSPredicate *pre = [NSPredicate predicateWithFormat:@"self.CPNetRequestUrl contains %@",urlStr.lastPathComponent];
+                [strongSelf.downTaskArr removeObjectsInArray:[strongSelf.downTaskArr filteredArrayUsingPredicate:pre]];
+                [strongSelf.downFileDataSource removeObjectForKey:filePath.absoluteString.lastPathComponent];
+                [strongSelf updataDownFileDataSourceToLocation];
+            }
+            
+            if (completionHandler)
+            {
+                completionHandler(response,filePath,error);
+            }
+        }];
+        downloadTask.CPNetRequestUrl = urlStr;
+        [self.downTaskArr addObject:downloadTask];
+        return downloadTask;
+    }
 }
 
+- (void)stopAllDownFileTask
+{
+    __weak CPNetRequest *weakSelf = self;
+    [self.downTaskArr enumerateObjectsUsingBlock:^(NSURLSessionDownloadTask * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.state == NSURLSessionTaskStateRunning) {
+            [obj cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+                __strong CPNetRequest *strongSelf = weakSelf;
+                [strongSelf.downFileDataSource setValue:resumeData forKey:[NSString stringWithFormat:@"%@",obj.CPNetRequestUrl.lastPathComponent]];
+            }];
+        }
+    }];
+    [self.downTaskArr removeAllObjects];
+    [self updataDownFileDataSourceToLocation];
+}
+
+- (void)stopDownFileTask:(NSURLSessionDownloadTask *)task
+{
+    if (!task) return;
+    
+    if (task.state == NSURLSessionTaskStateRunning) {
+        [task cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
+            [self.downFileDataSource setValue:resumeData forKey:task.CPNetRequestUrl.lastPathComponent];
+        }];
+        
+        NSPredicate *pre = [NSPredicate predicateWithFormat:@"self.CPNetRequestUrl contains %@",self.CPNetRequestUrl.lastPathComponent];
+        [self.downTaskArr removeObjectsInArray:[self.downTaskArr filteredArrayUsingPredicate:pre]];
+    }
+}
 
 #pragma mark - Method
 //添加请求头
@@ -468,7 +544,7 @@ static AFURLSessionManager *cpURLSessionManager;
 }
 
 
-//开始/恢复下载
+//开始/恢复请求
 - (void)startAllDataTaskRequest
 {
     for (RACCommand *command in self.commandArr)
@@ -494,6 +570,12 @@ static AFURLSessionManager *cpURLSessionManager;
     [self.commandArr removeAllObjects];
 }
 
+- (void)updataDownFileDataSourceToLocation
+{
+    NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject stringByAppendingPathComponent:@"downRecordDataSource"];
+    [self.downFileDataSource writeToFile:path atomically:NO];
+}
+
 #pragma mark - get
 - (NSMutableArray<NSString *> *)jsonAdjustsUrl{
     if (_jsonAdjustsUrl == nil)
@@ -509,6 +591,26 @@ static AFURLSessionManager *cpURLSessionManager;
         _commandArr = [NSMutableArray array];
     }
     return _commandArr;
+}
+
+- (NSMutableArray<NSURLSessionDownloadTask *> *)downTaskArr
+{
+    if (_downTaskArr == nil) {
+        _downTaskArr = [NSMutableArray array];
+    }
+    return _downTaskArr;
+}
+
+- (NSMutableDictionary<NSString *,NSData *> *)downFileDataSource
+{
+    if (_downFileDataSource == nil) {
+        NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject stringByAppendingPathComponent:@"downRecordDataSource"];
+        _downFileDataSource = [NSDictionary dictionaryWithContentsOfFile:path].mutableCopy;
+        if (_downFileDataSource == nil) {
+            _downFileDataSource = [NSMutableDictionary dictionary];
+        }
+    }
+    return _downFileDataSource;
 }
 
 @end

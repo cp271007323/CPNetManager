@@ -9,5 +9,6 @@ target 'CPNetManger_Demo' do
 
   pod 'AFNetworking'
   pod 'ReactiveObjC'
+  pod 'SDAutoLayout'
 
 end

@@ -124,7 +124,10 @@
                                   completionHandler:completionHandler];
 }
 
-
++ (void)stopAllDownTask
+{
+    [[CPNetRequest getManager] stopAllDownFileTask];
+}
 
 @end
 

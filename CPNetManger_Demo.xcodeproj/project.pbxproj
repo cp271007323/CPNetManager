@@ -19,6 +19,8 @@
 		E7067138236FF08E0063B02C /* CPDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = E7067133236FF08E0063B02C /* CPDataModel.m */; };
 		E7067139236FF08E0063B02C /* CPNetRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7067134236FF08E0063B02C /* CPNetRequest.m */; };
 		E726CCFB247CC44000A844FC /* RACCommand+CPNetExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = E726CCFA247CC44000A844FC /* RACCommand+CPNetExtension.m */; };
+		E799F8DD25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.m in Sources */ = {isa = PBXBuildFile; fileRef = E799F8DC25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.m */; };
+		E799F8E1256664D5004CB6CC /* CPNetDownFileCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E799F8E0256664D5004CB6CC /* CPNetDownFileCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +46,10 @@
 		E7067136236FF08E0063B02C /* CPNetRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPNetRequest.h; sourceTree = "<group>"; };
 		E726CCF9247CC44000A844FC /* RACCommand+CPNetExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RACCommand+CPNetExtension.h"; sourceTree = "<group>"; };
 		E726CCFA247CC44000A844FC /* RACCommand+CPNetExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "RACCommand+CPNetExtension.m"; sourceTree = "<group>"; };
+		E799F8DB25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSURLSessionDownloadTask+CPNetRequestUrl.h"; sourceTree = "<group>"; };
+		E799F8DC25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSURLSessionDownloadTask+CPNetRequestUrl.m"; sourceTree = "<group>"; };
+		E799F8DF256664D5004CB6CC /* CPNetDownFileCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CPNetDownFileCell.h; sourceTree = "<group>"; };
+		E799F8E0256664D5004CB6CC /* CPNetDownFileCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CPNetDownFileCell.m; sourceTree = "<group>"; };
 		F1AF657B6FE5B001C3C1CE5E /* Pods-CPNetManger_Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CPNetManger_Demo.release.xcconfig"; path = "Target Support Files/Pods-CPNetManger_Demo/Pods-CPNetManger_Demo.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -104,6 +110,8 @@
 				E706710F236FECA00063B02C /* SceneDelegate.m */,
 				E7067111236FECA00063B02C /* ViewController.h */,
 				E7067112236FECA00063B02C /* ViewController.m */,
+				E799F8DF256664D5004CB6CC /* CPNetDownFileCell.h */,
+				E799F8E0256664D5004CB6CC /* CPNetDownFileCell.m */,
 				E7067114236FECA00063B02C /* Main.storyboard */,
 				E7067117236FECA00063B02C /* Assets.xcassets */,
 				E7067119236FECA00063B02C /* LaunchScreen.storyboard */,
@@ -140,6 +148,8 @@
 			children = (
 				E726CCF9247CC44000A844FC /* RACCommand+CPNetExtension.h */,
 				E726CCFA247CC44000A844FC /* RACCommand+CPNetExtension.m */,
+				E799F8DB25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.h */,
+				E799F8DC25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.m */,
 			);
 			path = Category;
 			sourceTree = "<group>";
@@ -265,6 +275,8 @@
 				E706711E236FECA00063B02C /* main.m in Sources */,
 				E726CCFB247CC44000A844FC /* RACCommand+CPNetExtension.m in Sources */,
 				E7067110236FECA00063B02C /* SceneDelegate.m in Sources */,
+				E799F8DD25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.m in Sources */,
+				E799F8E1256664D5004CB6CC /* CPNetDownFileCell.m in Sources */,
 				E7067137236FF08E0063B02C /* CPNetManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

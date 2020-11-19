@@ -1,3 +1,4 @@
 ${PODS_ROOT}/Target Support Files/Pods-CPNetManger_Demo/Pods-CPNetManger_Demo-frameworks.sh
 ${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework
 ${BUILT_PRODUCTS_DIR}/ReactiveObjC/ReactiveObjC.framework
+${BUILT_PRODUCTS_DIR}/SDAutoLayout/SDAutoLayout.framework

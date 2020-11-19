@@ -91,6 +91,8 @@
                                 completionHandler:(CPNetRequestDownCompletionHandler _Nonnull)completionHandler;
 
 
-
+/// 停止所有下载任务
++ (void)stopAllDownTask;
+ 
 @end
 

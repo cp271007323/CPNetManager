@@ -111,5 +111,11 @@ typedef void(^CPNetRequestTokenOverdueBlock)(BOOL *flag);
                                    completionHandler:(CPNetRequestDownCompletionHandler _Nonnull)completionHandler;
 
 
+/// 暂停所有请求
+- (void)stopAllDownFileTask;
+
+/// 停止某个任务
+- (void)stopDownFileTask:(NSURLSessionDownloadTask *)task;
+
 @end
 

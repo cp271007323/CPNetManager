@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "CPNetManager"
-  s.version      = "1.2.0"
+  s.version      = "1.2.1"
   s.summary      = "网络请求框架"
   s.homepage     = "https://github.com/cp271007323/CPNetManager"
   s.license      = "MIT"
