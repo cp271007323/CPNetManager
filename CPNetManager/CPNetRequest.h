@@ -23,7 +23,7 @@ typedef void(^CPNetRequestFailure)(NSDictionary *  _Nullable responseObject , NS
 typedef NSURL * _Nonnull(^CPNetRequestDestination)(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response);
 typedef void(^CPNetRequestDownProgress)(CGFloat uploadProgress);
 typedef void(^CPNetRequestDownCompletionHandler)(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error);
-typedef void(^CPNetRequestTokenOverdueBlock)(BOOL *flag);
+typedef void(^CPNetRequestTokenOverdueBlock)(BOOL * _Nonnull flag);
 
 @interface CPNetRequest : AFHTTPSessionManager
 
@@ -33,19 +33,31 @@ typedef void(^CPNetRequestTokenOverdueBlock)(BOOL *flag);
 /// 初始化
 +(CPNetRequest *_Nullable)getManager;
 
+/// 显示日志
+- (void)showLogs;
+
 /// 添加请求头 添加一次就好
 - (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic;
 
-/// 添加请求成功时，code的值（默认为1）
-- (void)addResponseObjectCode:(NSInteger)code;
+/// 更新网络请求中code的标识
+- (void)changeCodeForNewCodeKey:(NSString * _Nonnull)codeKey;
+
+/// 更新网络请求中Message的标识
+- (void)changeMessageForNewMessageKey:(NSString * _Nonnull)messageKey;
+
+/// 添加请求成功时，codes的值（默认为@[@"1"]）
+- (void)addResponseObjectCodes:(NSArray<NSString *> * _Nonnull)codes;
 
 /// 添加json请求的链接的关键字，内部会自行判断  添加一次就好
 - (void)addRequestJsonUrl:(NSString *_Nonnull)url;
 
+/// 所有请求添加到json请求
+- (void)allRequestForJson;
+
 /// 传入token过期标识
-/// @param tokenCode token过期对应的code
+/// @param tokenCodes token过期对应的codes
 /// @param tokenOverdueBlock 发现token过期时的回调
-- (void)addTokenCode:(NSString *_Nonnull)tokenCode tokenOverdue:(CPNetRequestTokenOverdueBlock _Nullable )tokenOverdueBlock;
+- (void)addTokenCodes:(NSArray<NSString *> *_Nonnull)tokenCodes tokenOverdue:(CPNetRequestTokenOverdueBlock _Nullable)tokenOverdueBlock;
 
 /// 请求任务添加
 - (void)addCommandTask:(RACCommand *_Nonnull)command;
@@ -115,7 +127,7 @@ typedef void(^CPNetRequestTokenOverdueBlock)(BOOL *flag);
 - (void)stopAllDownFileTask;
 
 /// 停止某个任务
-- (void)stopDownFileTask:(NSURLSessionDownloadTask *)task;
+- (void)stopDownFileTask:(NSURLSessionDownloadTask * _Nullable)task;
 
 @end
 

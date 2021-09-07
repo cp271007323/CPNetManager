@@ -33,10 +33,81 @@
     [manager startMonitoring];
 }
 
++ (void)showLogs
+{
+    [[CPNetRequest getManager] showLogs];
+}
+
 + (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic
 {
     [[CPNetRequest getManager] addHeadHTTPHeaderField:dic];
 }
+ 
++ (void)changeCodeForNewCodeKey:(NSString * _Nonnull)codeKey
+{
+    [[CPNetRequest getManager] changeCodeForNewCodeKey:codeKey];
+}
+ 
++ (void)changeMessageForNewMessageKey:(NSString * _Nonnull)messageKey
+{
+    [[CPNetRequest getManager] changeMessageForNewMessageKey:messageKey];
+}
+
++ (void)addResponseObjectCodes:(NSArray<NSString *> * _Nonnull)codes
+{
+    [[CPNetRequest getManager] addResponseObjectCodes:codes];
+}
+ 
++ (void)addRequestJsonUrl:(NSString *_Nonnull)url
+{
+    [[CPNetRequest getManager] addRequestJsonUrl:url];
+}
+
++ (void)allRequestForJson
+{
+    [[CPNetRequest getManager] allRequestForJson];
+}
+ 
++ (void)addTokenCodes:(NSArray<NSString *> *_Nonnull)tokenCodes tokenOverdue:(CPNetRequestTokenOverdueBlock _Nullable)tokenOverdueBlock;
+{
+    [[CPNetRequest getManager] addTokenCodes:tokenCodes tokenOverdue:tokenOverdueBlock];
+}
+ 
++ (void)addCommandTask:(RACCommand *_Nonnull)command
+{
+    [[CPNetRequest getManager] addCommandTask:command];
+}
+ 
++ (void)removeCommandTask:(RACCommand *_Nonnull)command
+{
+    [[CPNetRequest getManager] removeCommandTask:command];
+}
+ 
++ (void)startAllDataTaskRequest
+{
+    [[CPNetRequest getManager] startAllDataTaskRequest];
+}
+ 
++ (void)stopAllDataTaskRequest
+{
+    [[CPNetRequest getManager] stopAllDataTaskRequest];
+}
+ 
++ (void)cancelAllDataTaskRequest
+{
+    [[CPNetRequest getManager] cancelAllDataTaskRequest];
+}
+
++ (void)stopAllDownTask
+{
+    [[CPNetRequest getManager] stopAllDownFileTask];
+}
+
++ (void)stopDownFileTask:(NSURLSessionDownloadTask * _Nullable)task
+{
+    [[CPNetRequest getManager] stopDownFileTask:task];
+}
+
 
 +(NSURLSessionTask * _Nonnull)POST:(NSString * _Nonnull)urlStr
  parameters:(NSDictionary * _Null_unspecified)dictionary
@@ -122,11 +193,6 @@
                                            progress:progress
                                         destination:destination
                                   completionHandler:completionHandler];
-}
-
-+ (void)stopAllDownTask
-{
-    [[CPNetRequest getManager] stopAllDownFileTask];
 }
 
 @end

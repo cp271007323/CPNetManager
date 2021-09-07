@@ -126,32 +126,16 @@
 			children = (
 				E7067130236FF08E0063B02C /* CPNetManager.h */,
 				E7067131236FF08E0063B02C /* CPNetManager.m */,
-				E726CCF8247CC42800A844FC /* Category */,
-				E7067132236FF08E0063B02C /* CPNetRequest */,
-			);
-			path = CPNetManager;
-			sourceTree = "<group>";
-		};
-		E7067132236FF08E0063B02C /* CPNetRequest */ = {
-			isa = PBXGroup;
-			children = (
-				E7067133236FF08E0063B02C /* CPDataModel.m */,
-				E7067134236FF08E0063B02C /* CPNetRequest.m */,
-				E7067135236FF08E0063B02C /* CPDataModel.h */,
-				E7067136236FF08E0063B02C /* CPNetRequest.h */,
-			);
-			path = CPNetRequest;
-			sourceTree = "<group>";
-		};
-		E726CCF8247CC42800A844FC /* Category */ = {
-			isa = PBXGroup;
-			children = (
 				E726CCF9247CC44000A844FC /* RACCommand+CPNetExtension.h */,
 				E726CCFA247CC44000A844FC /* RACCommand+CPNetExtension.m */,
 				E799F8DB25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.h */,
 				E799F8DC25665F68004CB6CC /* NSURLSessionDownloadTask+CPNetRequestUrl.m */,
+				E7067135236FF08E0063B02C /* CPDataModel.h */,
+				E7067133236FF08E0063B02C /* CPDataModel.m */,
+				E7067136236FF08E0063B02C /* CPNetRequest.h */,
+				E7067134236FF08E0063B02C /* CPNetRequest.m */,
 			);
-			path = Category;
+			path = CPNetManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

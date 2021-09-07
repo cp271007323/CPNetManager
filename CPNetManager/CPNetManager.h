@@ -11,15 +11,54 @@
 
 @interface CPNetManager : NSObject
 
-/**
- 网络检测
- */
-+(void)networkReachabilityStart;
+/// 网络检测
++ (void)networkReachabilityStart;
 
+/// 显示日志
++ (void)showLogs;
 
 /// 添加请求头 添加一次就好
-+ (void)addHeadHTTPHeaderField:(NSDictionary *_Nullable)dic;
- 
++ (void)addHeadHTTPHeaderField:(NSDictionary * _Nullable)dic;
+
+/// 更新网络请求中code的标识，默认@"code"
++ (void)changeCodeForNewCodeKey:(NSString * _Nonnull)codeKey;
+
+/// 更新网络请求中Message的标识，默认@"message"
++ (void)changeMessageForNewMessageKey:(NSString * _Nonnull)messageKey;
+
+/// 添加请求成功时，codes的值（默认为@[@"1"]）,会清空原有的codes
++ (void)addResponseObjectCodes:(NSArray<NSString *> * _Nonnull)codes;
+
+/// 添加json请求的链接的关键字，内部会自行判断  添加一次就好
++ (void)addRequestJsonUrl:(NSString * _Nonnull)url;
+
+/// 所有请求添加到json请求
++ (void)allRequestForJson;
+
+/// 传入token过期标识
++ (void)addTokenCodes:(NSArray<NSString *> *_Nonnull)tokenCodes tokenOverdue:(CPNetRequestTokenOverdueBlock _Nullable)tokenOverdueBlock;
+
+/// 请求任务添加
++ (void)addCommandTask:(RACCommand * _Nonnull)command;
+
+/// 请求任务移除
++ (void)removeCommandTask:(RACCommand * _Nonnull)command;
+
+/// 全部任务开始请求
++ (void)startAllDataTaskRequest;
+
+/// 暂停全部任务
++ (void)stopAllDataTaskRequest;
+
+/// 取消全部任务
++ (void)cancelAllDataTaskRequest;
+
+/// 停止所有下载任务
++ (void)stopAllDownTask;
+
+/// 停止某个下载任务
++ (void)stopDownFileTask:(NSURLSessionDownloadTask * _Nullable)task;
+
 /******************************************************************
  普通网络请求
  ******************************************************************/
@@ -90,9 +129,6 @@
                                       destination:(CPNetRequestDestination _Nonnull)destination
                                 completionHandler:(CPNetRequestDownCompletionHandler _Nonnull)completionHandler;
 
-
-/// 停止所有下载任务
-+ (void)stopAllDownTask;
  
 @end
 
