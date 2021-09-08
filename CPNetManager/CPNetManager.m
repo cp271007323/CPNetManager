@@ -72,6 +72,11 @@
 {
     [[CPNetRequest getManager] addTokenCodes:tokenCodes tokenOverdue:tokenOverdueBlock];
 }
+
++ (void)addErrorCode:(NSString *_Nonnull)errorCode backBack:(CPNetRequestFailure _Nullable)backBack
+{
+    [[CPNetRequest getManager] addErrorCode:errorCode backBack:backBack];
+}
  
 + (void)addCommandTask:(RACCommand *_Nonnull)command
 {

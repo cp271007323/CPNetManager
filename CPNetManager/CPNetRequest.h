@@ -59,6 +59,11 @@ typedef void(^CPNetRequestTokenOverdueBlock)(BOOL * _Nonnull flag);
 /// @param tokenOverdueBlock 发现token过期时的回调
 - (void)addTokenCodes:(NSArray<NSString *> *_Nonnull)tokenCodes tokenOverdue:(CPNetRequestTokenOverdueBlock _Nullable)tokenOverdueBlock;
 
+/// 传入errorCode错误标识
+/// @param errorCode 错误编码
+/// @param backBack 发现错误编码回调
+- (void)addErrorCode:(NSString *_Nonnull)errorCode backBack:(CPNetRequestFailure _Nullable)backBack;
+
 /// 请求任务添加
 - (void)addCommandTask:(RACCommand *_Nonnull)command;
 

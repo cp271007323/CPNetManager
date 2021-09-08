@@ -37,6 +37,8 @@
       
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"全部停止" style:UIBarButtonItemStyleDone target:self action:@selector(stop)];
     
+    
+    
 }
  
 

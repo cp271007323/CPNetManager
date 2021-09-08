@@ -52,6 +52,8 @@ typedef enum : NSUInteger {
 /// 下载文件记录
 @property (nonatomic , strong) NSMutableDictionary<NSString * , NSData *> *downFileDataSource;
 
+/// 错误编码回调字段
+@property (nonatomic , strong) NSMutableDictionary<NSString *, CPNetRequestFailure> *errorCodeDictionary;
 @end
 
 @implementation CPNetRequest
@@ -120,6 +122,13 @@ static AFURLSessionManager *cpURLSessionManager;
 {
     [self.tokenCodes addObjectsFromArray:tokenCodes];
     self.tokenOverdueBlock = tokenOverdueBlock;
+}
+
+- (void)addErrorCode:(NSString *_Nonnull)errorCode backBack:(CPNetRequestFailure _Nullable)backBack
+{
+    if (backBack) {
+        [self.errorCodeDictionary addEntriesFromDictionary:@{errorCode : backBack}];
+    }
 }
 
 - (void)addCommandTask:(RACCommand *_Nonnull)command;
@@ -513,6 +522,11 @@ static AFURLSessionManager *cpURLSessionManager;
             }
         }
         
+        if ([self.errorCodeDictionary.allKeys containsObject:code] && self.errorCodeDictionary[code]) {
+            NSString *message = responseObject[self.messageKey];
+            self.errorCodeDictionary[code](responseObject,message,responseObject[self.codeKey],task);
+        }
+        
         if (failure) {
             NSString *message = responseObject[self.messageKey];
             failure(responseObject,message,responseObject[self.codeKey],task);
@@ -617,5 +631,14 @@ static AFURLSessionManager *cpURLSessionManager;
     }
     return _tokenCodes;
 }
+
+- (NSMutableDictionary<NSString *,CPNetRequestFailure> *)errorCodeDictionary
+{
+    if (_errorCodeDictionary == nil) {
+        _errorCodeDictionary = [NSMutableDictionary dictionary];
+    }
+    return _errorCodeDictionary;
+}
+
 
 @end

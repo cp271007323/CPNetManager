@@ -38,6 +38,9 @@
 /// 传入token过期标识
 + (void)addTokenCodes:(NSArray<NSString *> *_Nonnull)tokenCodes tokenOverdue:(CPNetRequestTokenOverdueBlock _Nullable)tokenOverdueBlock;
 
+/// 传入errorCode错误标识
++ (void)addErrorCode:(NSString *_Nonnull)errorCode backBack:(CPNetRequestFailure _Nullable)backBack;
+
 /// 请求任务添加
 + (void)addCommandTask:(RACCommand * _Nonnull)command;
 
